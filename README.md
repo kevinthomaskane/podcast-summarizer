@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Podcast Summarizer
+
+A modern web application that transcribes and summarizes podcast episodes using AI. Built with Next.js, Tailwind CSS, and OpenAI's Whisper and GPT models.
+
+## Features
+
+- 🎙️ Upload podcast audio files
+- 🎯 Automatic transcription using OpenAI's Whisper
+- 📝 AI-powered summary generation
+- 💾 Persistent storage with Supabase
+- 📱 Clean, responsive UI with Tailwind CSS
+- 🔍 Searchable history of past transcripts
+- 📋 Copy-to-clipboard functionality
+- 🎨 Modern, intuitive interface
+
+## Tech Stack
+
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **Tailwind CSS** - Utility-first CSS framework
+- **TypeScript** - Type-safe JavaScript
+- **React Server Components** - For improved performance
+- **Client Components** - For interactive features
+
+### Backend
+- **Next.js API Routes** - Serverless API endpoints
+- **OpenAI API**
+  - Whisper - For audio transcription
+  - GPT-4 - For generating summaries
+- **Supabase**
+  - PostgreSQL database
+  - Row Level Security
+  - Real-time capabilities
+
+### Infrastructure
+- **Vercel** - Hosting and deployment
+- **Supabase** - Database and storage
+- **OpenAI** - AI services
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ and npm
+- Supabase account
+- OpenAI API key
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# OpenAI
+OPENAI_API_KEY=your_openai_api_key
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Database Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `transcripts` table in your Supabase database with the following schema:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sql
+create table transcripts (
+  id uuid default gen_random_uuid() primary key,
+  transcript text not null,
+  summary text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  file_name text not null
+);
 
-## Learn More
+-- Enable Row Level Security
+alter table transcripts enable row level security;
 
-To learn more about Next.js, take a look at the following resources:
+-- Create policy to allow all operations (you may want to restrict this in production)
+create policy "Allow all operations" on transcripts for all using (true);
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/podcast-summarizer.git
+cd podcast-summarizer
+```
 
-## Deploy on Vercel
+2. Install dependencies:
+```bash
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Run the development server:
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Project Structure
+
+```
+podcast-summarizer/
+├── app/
+│   ├── api/              # API routes
+│   │   ├── summarize/    # Summary generation endpoint
+│   │   └── upload/       # File upload endpoint
+│   ├── components/       # React components
+│   ├── history/         # History page
+│   ├── results/         # Individual result pages
+│   └── layout.tsx       # Root layout
+├── public/              # Static assets
+└── types/              # TypeScript types
+```
+
+## API Endpoints
+
+### POST /api/upload
+Handles audio file uploads and transcription.
+
+**Request:**
+- `file`: Audio file (mp3, wav, etc.)
+
+**Response:**
+```json
+{
+  "transcript": "string",
+  "id": "uuid"
+}
+```
+
+### POST /api/summarize
+Generates a summary from a transcript.
+
+**Request:**
+```json
+{
+  "transcript": "string",
+  "id": "uuid"
+}
+```
+
+**Response:**
+```json
+{
+  "summary": "string"
+}
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- OpenAI for providing the Whisper and GPT APIs
+- Supabase for the database and storage solutions
+- Next.js team for the amazing framework
+- Tailwind CSS for the utility-first CSS framework
